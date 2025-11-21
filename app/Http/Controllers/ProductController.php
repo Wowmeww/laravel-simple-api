@@ -22,7 +22,7 @@ class ProductController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name'        => 'required|string|max:255',
+                'name'        => 'required|string|max:255|unique:products,name',
                 'description' => 'nullable|string',
                 'price'       => 'required|numeric|min:0',
                 'stock'       => 'required|integer|min:0',
@@ -35,8 +35,7 @@ class ProductController extends Controller
                 'errors'  => $e->errors(),
             ], 422);
         }
-
-        $validated['id'] = Str::uuid();
+        // return $validated;
         $product = Product::create($validated);
 
         return response()->json([
