@@ -42,6 +42,7 @@ class UserAPIController extends Controller
                 'role' => 'sometimes|required|in:admin,customer',
             ]);
 
+
             $validated['password'] = Hash::make($validated['password']);
 
             $user = User::create($validated);
@@ -72,7 +73,11 @@ class UserAPIController extends Controller
         if (! $user) {
             return response()->json(['error' => 'User not found'], 404);
         }
-
+        $data = $request->all(['name', 'email', 'password', 'contact_number', 'role']);
+        $data = array_filter($data, fn($v) => $v != null);
+        if (!$data) {
+            return response()->json(['errors' => 'Must include data'], 400);
+        }
         try {
             $validated = $request->validate([
                 'name' => 'sometimes|required|string|max:255',
@@ -88,7 +93,10 @@ class UserAPIController extends Controller
 
             $user->update($validated);
 
-            return response()->json($user, 200);
+            return response()->json([
+                'message' => 'User updated successfully',
+                'user' => $user
+            ], 200);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 400);
         }
